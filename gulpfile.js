@@ -1,6 +1,22 @@
 // Importa o Gulp e o plugin para compilar Sass, utilizando o compilador Dart Sass.
 const gulp = require('gulp');
 const sass = require('gulp-sass')(require('sass'));
+const uglify = require('gulp-uglify');
+const obfuscate = require('gulp-obfuscate');
+const imagemin = require('gulp-imagemin');
+
+function comprimeImagens(){
+    return gulp.src('./source/images/*')
+        .pipe(imagemin())
+        .pipe(gulp.dest('./build/images'));
+}
+
+function comprimeJavaScript(){
+    return gulp.src('./source/scripts/*.js')
+        .pipe(uglify())
+        .pipe(obfuscate())
+        .pipe(gulp.dest('./build/scripts'));
+}
 
 // Importa o plugin para gerar sourcemaps.
 const sourcemaps = require('gulp-sourcemaps');
@@ -14,39 +30,10 @@ function compilaSass(){
         .pipe(gulp.dest('./build/styles')); // Salva o CSS compilado no diretório de destino.
 }
 
-// Função para simular uma tarefa com um delay de 2 segundos.
-function funcaoPadrao(callback){
-    setTimeout(function() {
-        console.log('Execultando via Gulp');
-        callback(); // Chama o callback para informar ao Gulp que a tarefa terminou.
-    }, 2000);
-}
-
-// Função que imprime uma mensagem e chama outra função para imprimir "Tchau Gulp".
-function dizOi(callback){
-    setTimeout(function(){
-        console.log('Olá Gulp');
-        dizTchau(); // Chama a função dizTchau.
-        callback(); // Indica ao Gulp que a tarefa foi concluída.
-    }, 1000);
-}
-
-// Função que imprime "Tchau Gulp".
-function dizTchau() {
-    console.log('Tchau Gulp');
-}
-
-// Define a função padrão para ser executada com a tarefa padrão do Gulp.
-// exports.default = gulp.parallel(funcaoPadrao, dizOi); // Executa funcaoPadrao e dizOi em paralelo.
-
-// Exporta a função dizOi para ser chamada separadamente, se necessário.
-// exports.dizOi = dizOi;
-
-// Exporta a função compilaSass para compilar o Sass.
-exports.sass = compilaSass;
-
 // Função watch para monitorar mudanças nos arquivos .scss e recompilar automaticamente.
-exports.watch = function(){
+exports.default = function(){
     gulp.watch('./source/styles/*.scss', { ignoreInitial: false }, gulp.series(compilaSass)); 
+    gulp.watch('./source/scripts/*.js', { ignoreInitial: false }, gulp.series( comprimeJavaScript)); 
+    gulp.watch('./source/images/*', { ignoreInitial: false }, gulp.series(comprimeImagens)); 
     // Observa arquivos .scss no diretório ./source/styles e roda compilaSass automaticamente quando há mudanças.
 }
