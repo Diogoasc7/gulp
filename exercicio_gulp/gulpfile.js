@@ -2,6 +2,8 @@ const gulp = require('gulp');
 const sourcemaps = require('gulp-sourcemaps');
 const sass = require('gulp-sass')(require('sass'));
 const imagemin = require('gulp-imagemin');
+const uglify = require('gulp-uglify');
+const obfuscate = require('gulp-obfuscate');
 
 function compilaSass(){
     return gulp.src('./source/styles/main.scss')
@@ -17,5 +19,16 @@ function comprimeImagens(){
         .pipe(gulp.dest('build/images'));
 }
 
-exports.sass = compilaSass;
-exports.images = comprimeImagens;
+function comprimeJavaScript(){
+    return gulp.src('./source/scripts/*js')
+        .pipe(uglify())
+        .pipe(obfuscate())
+        .pipe(gulp.dest('./build/scripts'));
+}
+
+exports.default = function(){
+    gulp.watch('./source/styles/*.scss', { ignoreInitial: false }, gulp.series(compilaSass)); 
+    gulp.watch('./source/scripts/*.js', { ignoreInitial: false }, gulp.series( comprimeJavaScript)); 
+    gulp.watch('./source/images/*', { ignoreInitial: false }, gulp.series(comprimeImagens)); 
+    // Observa arquivos .scss no diretório ./source/styles e roda compilaSass automaticamente quando há mudanças.
+}
